@@ -1,7 +1,7 @@
 import { JsonLd } from "@/components/seo/json-ld";
 import { PLANS } from "@/data/constants";
 import { SectionHeading } from "@/components/marketing/section-heading";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PricingCards } from "@/components/marketing/pricing-cards";
 
 const pricingSchema = {
   "@context": "https://schema.org",
@@ -24,23 +24,14 @@ export default function PricingPage() {
       <SectionHeading
         title="Pricing"
         kicker="Simple and clear"
-        description="Start free, iterate with confidence, and scale to pro as you publish more prompts."
+        description="Start free, forge faster with pro tooling, and bring a team when your prompt stack gets serious."
       />
-      <div className="mt-8 grid gap-4 md:grid-cols-3">
-        {PLANS.map((plan) => (
-          <Card key={plan.id} className={plan.highlight ? "ring-2 ring-slate-900" : ""}>
-            <CardHeader>
-              <CardTitle>{plan.name}</CardTitle>
-              <CardDescription>{plan.description}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-semibold">{plan.price} <span className="text-sm">{plan.frequency}</span></p>
-              <ul className="mt-4 space-y-2 text-sm text-slate-700">
-                {plan.features.map((feature) => <li key={feature}>• {feature}</li>)}
-              </ul>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="mt-8">
+        <p className="mb-6 max-w-3xl text-sm text-slate-600">
+          No credit card required to start. Free gives immediate value via the local forge engine, Pro adds
+          scale-focused workflow polish, and Team is our &ldquo;coming next quarter&rdquo; placeholder.
+        </p>
+        <PricingCards />
       </div>
     </div>
   );

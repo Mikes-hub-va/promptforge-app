@@ -133,6 +133,9 @@ export interface NavItem {
 export interface Plan {
   id: ID;
   name: string;
+  handle?: string;
+  subtitle?: string;
+  accent?: string;
   price: string;
   frequency: string;
   highlight?: boolean;

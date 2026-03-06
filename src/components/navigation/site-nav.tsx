@@ -12,7 +12,7 @@ export default function SiteNav() {
     <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/80 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 md:px-8">
         <Link href="/" className="inline-flex items-center gap-2">
-          <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-slate-900 text-white">
+          <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-white shadow-[0_8px_24px_-10px_rgba(15,23,42,0.45)]">
             <Flame className="h-5 w-5" />
           </span>
           <span className="text-lg font-semibold tracking-tight">PromptForge</span>
@@ -23,7 +23,7 @@ export default function SiteNav() {
             <Link
               key={item.href}
               href={item.href}
-              className="rounded-lg px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 hover:text-slate-900"
+              className="rounded-lg px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-900/[0.05] hover:text-slate-900"
             >
               {item.label}
             </Link>
@@ -33,7 +33,7 @@ export default function SiteNav() {
         <div className="hidden md:flex items-center gap-2">
           <Link
             href="/workspace"
-            className="rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-semibold text-white"
+            className="rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-semibold text-white shadow-[0_8px_20px_-12px_rgba(15,23,42,0.55)]"
           >
             Open Workspace
           </Link>
@@ -55,7 +55,7 @@ export default function SiteNav() {
             <Link
               key={item.href}
               href={item.href}
-              className="block rounded-lg px-3 py-2 text-sm font-medium text-slate-700"
+              className="block rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-900/[0.06]"
               onClick={() => setOpen(false)}
             >
               {item.label}
@@ -72,7 +72,7 @@ export default function SiteNav() {
 
 export function ProductMark({ label }: { label: string }) {
   return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-700">
+    <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-900/90 px-3 py-1 text-xs font-semibold text-white">
       <Sparkles className="h-3.5 w-3.5" />
       {label}
     </span>

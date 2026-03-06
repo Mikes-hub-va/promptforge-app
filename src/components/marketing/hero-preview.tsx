@@ -2,10 +2,10 @@ import { Card, CardContent } from "@/components/ui/card";
 
 export function PromptForgePreview() {
   return (
-    <Card className="overflow-hidden border-slate-300/70 bg-gradient-to-br from-white via-slate-100 to-white">
+    <Card className="overflow-hidden border-slate-300/70 bg-gradient-to-br from-white via-slate-100/80 to-white shadow-[0_24px_60px_-32px_rgba(15,23,42,0.45)]">
       <CardContent className="p-0">
         <div className="grid divide-y md:grid-cols-2 md:divide-x md:divide-y-0">
-          <div className="space-y-3 p-6">
+          <div className="space-y-3 border-slate-200/70 bg-white/90 p-6">
             <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Raw input</p>
             <p className="text-sm leading-7 text-slate-700">&quot;Need an email asking users to upgrade, but make it sound less pushy&quot;</p>
             <div className="h-3 rounded-full bg-slate-200">

@@ -11,8 +11,8 @@ export function SectionHeading({
 }) {
   return (
     <div className="max-w-3xl">
-      {kicker ? <p className="text-sm font-medium text-slate-500">{kicker}</p> : null}
-      <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">{title}</h2>
+      {kicker ? <p className="inline-flex items-center rounded-full bg-slate-900/5 px-2.5 py-1 text-xs font-medium uppercase tracking-[0.22em] text-slate-500">{kicker}</p> : null}
+      <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">{title}</h2>
       <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">{description}</p>
     </div>
   );

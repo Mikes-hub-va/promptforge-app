@@ -61,9 +61,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en">
       <body className={`${inter.variable} ${sourceCode.variable} antialiased`}>
         <PromptForgeStoreProvider>
-          <div className="min-h-screen bg-white text-slate-900">
+          <div className="pf-shell min-h-screen text-slate-900">
             <SiteNav />
-            <main>{children}</main>
+            <main className="relative">{children}</main>
             <SiteFooter />
           </div>
         </PromptForgeStoreProvider>

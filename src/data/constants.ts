@@ -54,7 +54,10 @@ export const USE_CASE_LABELS: Record<UseCaseCategory, string> = {
 export const PLANS: Plan[] = [
   {
     id: "free",
-    name: "Free",
+    name: "Forge Starter",
+    handle: "for day-1 builders",
+    subtitle: "The forge floor plan",
+    accent: "Spark",
     price: "$0",
     frequency: "forever",
     description: "For individuals who want immediate value with prompt quality controls.",
@@ -70,7 +73,10 @@ export const PLANS: Plan[] = [
   },
   {
     id: "pro",
-    name: "Pro",
+    name: "Forge Pro",
+    handle: "for people with momentum",
+    subtitle: "The default ship mode",
+    accent: "Boost",
     price: "$12",
     frequency: "/month",
     highlight: true,
@@ -88,7 +94,10 @@ export const PLANS: Plan[] = [
   },
   {
     id: "team",
-    name: "Team",
+    name: "Guild Foundry",
+    handle: "for organized chaos",
+    subtitle: "For the future team mode",
+    accent: "Coming Soon",
     price: "Coming Soon",
     frequency: "",
     comingSoon: true,

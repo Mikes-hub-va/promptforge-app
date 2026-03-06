@@ -1,9 +1,12 @@
 @import "tailwindcss";
 
 :root {
-  --pf-bg: #f8fafc;
+  --pf-bg: #f2f6fb;
   --pf-panel: #ffffff;
   --pf-line: #e2e8f0;
+  --pf-text: #0f172a;
+  --pf-muted: #4b5563;
+  --pf-elev: 0 22px 70px -45px rgba(15, 23, 42, 0.35);
 }
 
 * {
@@ -14,11 +17,14 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(circle at 20% 0%, #ecfeff 0%, transparent 45%),
-    radial-gradient(circle at 80% 20%, #f5f3ff 0%, transparent 40%),
+    radial-gradient(circle at 15% 0%, #d9eafe 0%, rgba(217, 234, 254, 0) 45%),
+    radial-gradient(circle at 84% 16%, #f0e7ff 0%, rgba(240, 231, 255, 0) 42%),
+    radial-gradient(circle at 72% 84%, #eaf8f1 0%, rgba(234, 248, 241, 0) 35%),
+    linear-gradient(180deg, #f8fbff 0%, #f3f5fb 45%, #f7f9ff 100%),
     var(--pf-bg);
-  color: #0f172a;
+  color: var(--pf-text);
   font-family: var(--font-sans), system-ui, -apple-system, Segoe UI, sans-serif;
+  text-rendering: optimizeLegibility;
 }
 
 a {
@@ -37,4 +43,46 @@ h4 {
 pre {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+}
+
+.pf-shell {
+  @apply relative isolate overflow-hidden;
+}
+
+.pf-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(115deg, rgba(56, 189, 248, 0.08), transparent 45%),
+    linear-gradient(245deg, rgba(139, 92, 246, 0.08), transparent 50%);
+  pointer-events: none;
+}
+
+.pf-card-shine {
+  @apply relative overflow-hidden;
+}
+
+.pf-card-shine::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  pointer-events: none;
+  opacity: 0.25;
+  background: linear-gradient(
+    120deg,
+    rgba(255, 255, 255, 0.4),
+    rgba(255, 255, 255, 0.03) 35%,
+    rgba(255, 255, 255, 0)
+  );
+}
+
+.pf-panel {
+  @apply rounded-3xl border border-slate-200/70 bg-white/85 backdrop-blur-sm shadow-[var(--pf-elev)];
+}
+
+.pf-panel-muted {
+  @apply rounded-2xl border border-slate-200/80 bg-slate-50/80;
 }
