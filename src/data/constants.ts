@@ -34,7 +34,7 @@ export const MODEL_OPTIONS = [
   { value: "gemini", label: "Gemini" },
   { value: "midjourney", label: "Midjourney" },
   { value: "sora", label: "Sora" },
-  { value: "openclaw", label: "OpenClaw" },
+  { value: "copilot", label: "Microsoft Copilot" },
   { value: "other", label: "Custom / Other" },
 ];
 
