@@ -43,7 +43,7 @@ export default function HomePage() {
   const billingReady = platform.billingReady;
   const managedRuntimeLabel = platform.managedRuntimeReady
     ? `Managed runtime live with ${platform.managedProviders.join(", ")}.`
-    : "Local mode and BYOK are live now. Managed cloud activates when a server key is added.";
+    : platform.managedRuntimeGuardMessage ?? "Local mode and BYOK are live now. Managed cloud activates when a server key is added.";
   const homeSchema = {
     "@context": "https://schema.org",
     "@graph": [

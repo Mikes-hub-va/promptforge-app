@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowRight,
   Bookmark,
+  BriefcaseBusiness,
   CreditCard,
   History,
   KeyRound,
@@ -34,6 +35,8 @@ type BillingStatus = {
   hasWebhookSecret: boolean;
   checkoutReady: boolean;
   billingReady: boolean;
+  runtimeAllowed?: boolean;
+  runtimeGuardMessage?: string | null;
 };
 
 type AccountPageClientProps = {
@@ -41,6 +44,8 @@ type AccountPageClientProps = {
   billingReady: boolean;
   domain: string;
   managedProviders: string[];
+  managedRuntimeGuardMessage?: string | null;
+  canAccessOwnerDashboard: boolean;
 };
 
 function noticeClasses(tone: NoticeTone) {
@@ -64,7 +69,8 @@ function PlatformStatusCard({
   billingReady,
   domain,
   managedProviders,
-}: Pick<AccountPageClientProps, "billing" | "billingReady" | "domain" | "managedProviders">) {
+  managedRuntimeGuardMessage,
+}: Pick<AccountPageClientProps, "billing" | "billingReady" | "domain" | "managedProviders" | "managedRuntimeGuardMessage">) {
   const domainLabel = useMemo(() => {
     try {
       return new URL(domain).host;
@@ -86,12 +92,12 @@ function PlatformStatusCard({
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
             <p className="text-xs uppercase tracking-[0.16em] text-slate-500">Managed runtime</p>
             <p className="mt-2 text-sm font-semibold text-slate-900">
-              {managedProviders.length > 0 ? "Available" : "BYOK only"}
+              {managedProviders.length > 0 ? "Available" : managedRuntimeGuardMessage ? "Production-only" : "BYOK only"}
             </p>
             <p className="mt-1 text-xs text-slate-600">
               {managedProviders.length > 0
                 ? `Connected providers: ${managedProviders.join(", ")}.`
-                : "Managed provider access is not enabled yet."}
+                : managedRuntimeGuardMessage ?? "Managed provider access is not enabled yet."}
             </p>
           </div>
 
@@ -109,6 +115,8 @@ function PlatformStatusCard({
             <p className="mt-1 text-xs text-slate-600">
               {billingReady
                 ? "Stripe checkout and customer portal routes are available for eligible accounts."
+                : billing.runtimeGuardMessage
+                  ? billing.runtimeGuardMessage
                 : billing.checkoutReady
                   ? "Checkout can be created, but the webhook secret is still missing, so billing stays disabled until subscription sync is safe."
                   : "Upgrade controls stay visible, but checkout will not open until the Stripe secret key, price ID, and webhook secret are added."}
@@ -130,10 +138,10 @@ function PlatformStatusCard({
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <p className="text-xs uppercase tracking-[0.16em] text-slate-500">Primary domain</p>
+            <p className="text-xs uppercase tracking-[0.16em] text-slate-500">Current domain</p>
             <p className="mt-2 text-sm font-semibold text-slate-900">{domainLabel}</p>
             <p className="mt-1 text-xs text-slate-600">
-              Account sync, billing, and prompt history all run on the primary Promptify domain.
+              This card reflects the runtime and host you are currently using.
             </p>
           </div>
         </div>
@@ -153,8 +161,16 @@ function PlatformStatusCard({
   );
 }
 
-export function AccountPageClient({ billing, billingReady, domain, managedProviders }: AccountPageClientProps) {
+export function AccountPageClient({
+  billing,
+  billingReady,
+  domain,
+  managedProviders,
+  managedRuntimeGuardMessage,
+  canAccessOwnerDashboard,
+}: AccountPageClientProps) {
   const { user, isLoading, login, logout, refresh, signup } = useAuth();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [globalNotice, setGlobalNotice] = useState<InlineNotice | null>(null);
   const [billingBusy, setBillingBusy] = useState(false);
@@ -173,16 +189,31 @@ export function AccountPageClient({ billing, billingReady, domain, managedProvid
 
   const checkoutState = useMemo(() => searchParams.get("checkout"), [searchParams]);
   const upgradeIntent = useMemo(() => searchParams.get("intent") === "upgrade", [searchParams]);
+  const restrictedIntent = useMemo(() => searchParams.get("restricted") === "ops", [searchParams]);
 
   useEffect(() => {
     setProfileForm({ name: user?.name ?? "" });
   }, [user?.name]);
+
+  useEffect(() => {
+    setGlobalNotice(null);
+    setProfileNotice(null);
+    setPasswordNotice(null);
+    setLoginForm({ email: "", password: "" });
+    setSignupForm({ name: "", email: "", password: "" });
+    setPasswordForm({
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    });
+  }, [user?.id]);
 
   const submitLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setGlobalNotice(null);
     try {
       await login(loginForm);
+      router.refresh();
     } catch (nextError) {
       setGlobalNotice({
         tone: "error",
@@ -196,6 +227,7 @@ export function AccountPageClient({ billing, billingReady, domain, managedProvid
     setGlobalNotice(null);
     try {
       await signup(signupForm);
+      router.refresh();
     } catch (nextError) {
       setGlobalNotice({
         tone: "error",
@@ -294,6 +326,7 @@ export function AccountPageClient({ billing, billingReady, domain, managedProvid
         throw new Error(await readErrorMessage(response, "Unable to update your password."));
       }
 
+      router.refresh();
       setPasswordForm({
         currentPassword: "",
         newPassword: "",
@@ -301,7 +334,7 @@ export function AccountPageClient({ billing, billingReady, domain, managedProvid
       });
       setPasswordNotice({
         tone: "success",
-        message: "Password updated. Future sessions will require the new credentials.",
+        message: "Password updated. Other active sessions were signed out and this session was rotated.",
       });
     } catch (nextError) {
       setPasswordNotice({
@@ -417,7 +450,13 @@ export function AccountPageClient({ billing, billingReady, domain, managedProvid
           </div>
 
           <div className="space-y-6">
-            <PlatformStatusCard billing={billing} billingReady={billingReady} domain={domain} managedProviders={managedProviders} />
+            <PlatformStatusCard
+              billing={billing}
+              billingReady={billingReady}
+              domain={domain}
+              managedProviders={managedProviders}
+              managedRuntimeGuardMessage={managedRuntimeGuardMessage}
+            />
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -453,7 +492,14 @@ export function AccountPageClient({ billing, billingReady, domain, managedProvid
             Signed in as {user.email}. Saved prompts and prompt history now sync to your account automatically.
           </p>
         </div>
-        <Button type="button" variant="outline" onClick={() => void logout()} disabled={isLoading || profileBusy || passwordBusy}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => {
+            void logout().then(() => router.refresh());
+          }}
+          disabled={isLoading || profileBusy || passwordBusy}
+        >
           <LogOut className="h-4 w-4" />
           Sign out
         </Button>
@@ -462,6 +508,12 @@ export function AccountPageClient({ billing, billingReady, domain, managedProvid
       {upgradeIntent && !billingReady ? (
         <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
           Billing is not active yet. Contact support if you want Promptify Pro enabled before checkout is turned on here.
+        </div>
+      ) : null}
+
+      {restrictedIntent ? (
+        <div className="mt-6 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-800">
+          The owner dashboard is limited to configured owner accounts.
         </div>
       ) : null}
 
@@ -513,7 +565,7 @@ export function AccountPageClient({ billing, billingReady, domain, managedProvid
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className={`grid gap-3 ${canAccessOwnerDashboard ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
                   <Button asChild variant="ghost">
                     <Link href="/saved">
                       <Bookmark className="h-4 w-4" />
@@ -526,6 +578,14 @@ export function AccountPageClient({ billing, billingReady, domain, managedProvid
                       History
                     </Link>
                   </Button>
+                  {canAccessOwnerDashboard ? (
+                    <Button asChild variant="ghost">
+                      <Link href="/ops">
+                        <BriefcaseBusiness className="h-4 w-4" />
+                        Dashboard
+                      </Link>
+                    </Button>
+                  ) : null}
                 </div>
               </div>
             </CardContent>
@@ -636,7 +696,9 @@ export function AccountPageClient({ billing, billingReady, domain, managedProvid
                   }
                 />
 
-                <p className="text-xs text-slate-500">Use at least 10 characters with uppercase, lowercase, and a number. Avoid reusing credentials from other apps.</p>
+                <p className="text-xs text-slate-500">
+                  Use at least 10 characters with uppercase, lowercase, and a number. Changing your password also signs out your other active sessions.
+                </p>
 
                 {passwordNotice ? (
                   <div className={`rounded-2xl border px-4 py-3 text-sm ${noticeClasses(passwordNotice.tone)}`}>
@@ -653,7 +715,13 @@ export function AccountPageClient({ billing, billingReady, domain, managedProvid
         </div>
 
         <div className="space-y-6">
-          <PlatformStatusCard billing={billing} billingReady={billingReady} domain={domain} managedProviders={managedProviders} />
+          <PlatformStatusCard
+            billing={billing}
+            billingReady={billingReady}
+            domain={domain}
+            managedProviders={managedProviders}
+            managedRuntimeGuardMessage={managedRuntimeGuardMessage}
+          />
 
           <Card>
             <CardHeader>

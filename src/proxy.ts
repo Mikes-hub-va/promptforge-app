@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { shouldAllowSearchIndexing } from "@/lib/platform/runtime";
 
 export function proxy(request: NextRequest) {
-  void request;
   const response = NextResponse.next();
   const contentSecurityPolicy = [
     "default-src 'self'",
@@ -32,6 +32,15 @@ export function proxy(request: NextRequest) {
   response.headers.set("Cross-Origin-Opener-Policy", "same-origin");
   response.headers.set("Cross-Origin-Resource-Policy", "same-site");
   response.headers.set("Origin-Agent-Cluster", "?1");
+
+  if (!shouldAllowSearchIndexing()) {
+    response.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
+  }
+
+  const forwardedProto = request.headers.get("x-forwarded-proto");
+  if (forwardedProto === "https" || request.nextUrl.protocol === "https:") {
+    response.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+  }
 
   return response;
 }

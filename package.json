@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "deploy:preview": "vercel deploy -y --scope mikes-hub-vas-projects",
+    "deploy:staging": "node scripts/deploy-staging.mjs",
+    "deploy:prod": "vercel deploy --prod --public -y --scope mikes-hub-vas-projects"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

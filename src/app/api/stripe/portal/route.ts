@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/server";
 import { getStripe } from "@/lib/billing/stripe";
+import { getPlatformStatus } from "@/lib/platform/status";
 import { applyRateLimitHeaders, consumeRateLimit, createRateLimitError } from "@/lib/security/rate-limit";
 import { rejectUntrustedOrigin } from "@/lib/security/request-origin";
 
@@ -28,6 +29,18 @@ export async function POST(request: Request) {
   }
 
   const stripe = getStripe();
+  const platform = getPlatformStatus();
+
+  if (!platform.billingReady) {
+    return applyRateLimitHeaders(
+      NextResponse.json(
+        { error: platform.billing.runtimeGuardMessage ?? "Billing portal is not available for this account yet." },
+        { status: 400 },
+      ),
+      rateLimit,
+    );
+  }
+
   if (!stripe || !user.stripeCustomerId) {
     return applyRateLimitHeaders(
       NextResponse.json({ error: "Billing portal is not available for this account yet." }, { status: 400 }),

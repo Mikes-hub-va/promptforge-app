@@ -5,7 +5,9 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import SiteNav from "@/components/navigation/site-nav";
 import SiteFooter from "@/components/navigation/site-footer";
+import { NonProductionBanner } from "@/components/platform/non-production-banner";
 import { AuthProvider } from "@/lib/auth/client";
+import { canAccessOwnerDashboard } from "@/lib/auth/owners";
 import { getCurrentUser } from "@/lib/auth/server";
 import { PromptifyStoreProvider } from "@/lib/storage/manager";
 
@@ -84,6 +86,8 @@ export const viewport: Viewport = {
   colorScheme: "light",
 };
 
+const shouldEnableVercelTelemetry = Boolean(process.env.VERCEL?.trim() || process.env.VERCEL_ENV?.trim());
+
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const currentUser = await getCurrentUser();
 
@@ -99,6 +103,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <AuthProvider initialUser={currentUser}>
           <PromptifyStoreProvider>
             <div className="pf-shell min-h-screen text-slate-900">
+              <NonProductionBanner showOwnerLink={canAccessOwnerDashboard(currentUser)} />
               <SiteNav />
               <main id="main-content" className="relative">
                 {children}
@@ -107,8 +112,12 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
             </div>
           </PromptifyStoreProvider>
         </AuthProvider>
-        <Analytics />
-        <SpeedInsights />
+        {shouldEnableVercelTelemetry ? (
+          <>
+            <Analytics />
+            <SpeedInsights />
+          </>
+        ) : null}
       </body>
     </html>
   );

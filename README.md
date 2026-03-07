@@ -106,6 +106,8 @@ Both are expected to pass before release. The production build is intentionally 
 Promptify runs in guest local mode with no provider key. Copy `.env.example` to `.env.local` when you want to wire accounts, billing, and hosted providers.
 
 - `PROMPTIFY_DATABASE_PATH` (optional): SQLite file path (default `./data/promptify.sqlite`).
+- `PROMPTIFY_OWNER_EMAILS` (optional): comma-separated owner emails allowed to open `/ops`.
+- `PROMPTIFY_ENABLE_MANAGED_RUNTIME_NON_PRODUCTION` (optional): set to `true` only when you intentionally want managed AI enabled on preview or staging.
 - `OPENAI_API_KEY` (optional): enables the managed OpenAI-compatible generation lane.
 - `OPENAI_API_BASE_URL` (optional): set this to an OpenAI-compatible host such as OpenRouter.
 - `OPENAI_PROVIDER_LABEL` (optional): label the managed OpenAI-compatible lane in the product UI.
@@ -182,6 +184,32 @@ Before publish:
 - Provision a persistent disk for `PROMPTIFY_DATABASE_PATH`, or replace SQLite with a hosted database
 - Configure Stripe webhook delivery to `/api/stripe/webhook`
 - Set any provider keys you want available for managed Pro runs
+
+## Release lanes
+
+Promptify now has a clear release path:
+
+- Production: `https://usepromptify.org`
+- Staging: `https://staging.usepromptify.org`
+- Preview: disposable Vercel preview deployments for branch work
+- Local: `http://localhost:3000`
+
+Recommended flow:
+
+1. Build on a feature branch and verify the Vercel preview deployment.
+2. Promote the release candidate to staging for QA.
+3. Merge to `main` only after staging passes.
+4. Let Production stay mapped to `usepromptify.org`.
+
+Helper commands:
+
+```bash
+npm run deploy:preview
+npm run deploy:staging
+npm run deploy:prod
+```
+
+The signed-in owner dashboard lives at `/ops` and mirrors the current release notes, review findings, and owner action items in one place. Set `PROMPTIFY_OWNER_EMAILS` so that page stays limited to owner accounts.
 
 ### Vercel note
 

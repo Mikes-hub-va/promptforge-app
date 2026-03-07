@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getCurrentUser, updateUserPassword } from "@/lib/auth/server";
+import { attachSessionCookie, createSession, getCurrentUser, invalidateSessionsForUser, updateUserPassword } from "@/lib/auth/server";
 import { applyRateLimitHeaders, consumeRateLimit, createRateLimitError } from "@/lib/security/rate-limit";
 import { rejectUntrustedOrigin } from "@/lib/security/request-origin";
 import { passwordChangeSchema } from "@/lib/validation/auth";
@@ -43,5 +43,9 @@ export async function POST(request: Request) {
     return applyRateLimitHeaders(NextResponse.json({ error: result.error }, { status: 400 }), rateLimit);
   }
 
-  return applyRateLimitHeaders(NextResponse.json({ ok: true }), rateLimit);
+  invalidateSessionsForUser(user.id);
+  const session = createSession(user.id);
+  const response = NextResponse.json({ ok: true });
+  attachSessionCookie(response, session, request);
+  return applyRateLimitHeaders(response, rateLimit);
 }

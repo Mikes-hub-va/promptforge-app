@@ -19,6 +19,7 @@ import { validateOpenAICompatibleBaseUrl } from "@/lib/security/provider-endpoin
 import { applyRateLimitHeaders, consumeRateLimit, createRateLimitError } from "@/lib/security/rate-limit";
 import { rejectUntrustedOrigin } from "@/lib/security/request-origin";
 import { createId } from "@/lib/utils/id";
+import { getPlatformStatus } from "@/lib/platform/status";
 
 type Mode = "auto" | "heuristic" | "provider";
 
@@ -336,7 +337,8 @@ export async function POST(request: Request) {
   }
 
   const { settings, mode, providerConfig, compareModels } = parsed.data;
-  const canUseManagedProvider = currentUser?.planTier === "pro";
+  const platform = getPlatformStatus();
+  const canUseManagedProvider = currentUser?.planTier === "pro" && platform.managedRuntimeReady;
   const resolvedSettings: PromptSettings = {
     ...defaults,
     ...settings,
@@ -408,20 +410,13 @@ export async function POST(request: Request) {
               ),
             } as PromptComparisonOutput;
           } catch {
-            return {
-              id: crypto.randomUUID(),
-              provider: activeProviderConfig.provider,
-              model,
-              output: result.output,
-              mode: "heuristic" as const,
-              costEstimateUsd: undefined,
-            } as PromptComparisonOutput;
+            return null;
           }
         });
 
       const settled = await Promise.allSettled(comparePromises);
       for (const item of settled) {
-        if (item.status === "fulfilled") {
+        if (item.status === "fulfilled" && item.value) {
           outputComparisons.push(item.value);
         }
       }

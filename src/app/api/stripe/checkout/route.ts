@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser, updateUserBilling } from "@/lib/auth/server";
 import { getStripe, getStripeConfigStatus, getStripeProPriceId } from "@/lib/billing/stripe";
+import { getPlatformStatus } from "@/lib/platform/status";
 import { applyRateLimitHeaders, consumeRateLimit, createRateLimitError } from "@/lib/security/rate-limit";
 import { rejectUntrustedOrigin } from "@/lib/security/request-origin";
 
@@ -30,6 +31,18 @@ export async function POST(request: Request) {
   const stripe = getStripe();
   const priceId = getStripeProPriceId();
   const stripeStatus = getStripeConfigStatus();
+  const platform = getPlatformStatus();
+
+  if (!platform.billingReady) {
+    const errorMessage = platform.billing.runtimeGuardMessage
+      ?? "Stripe checkout is not fully configured yet. Add STRIPE_SECRET_KEY, STRIPE_PRICE_PRO_MONTHLY, and STRIPE_WEBHOOK_SECRET.";
+    return applyRateLimitHeaders(
+      NextResponse.json({
+        error: errorMessage,
+      }, { status: 503 }),
+      rateLimit,
+    );
+  }
 
   if (!stripe || !priceId || !stripeStatus.hasWebhookSecret) {
     return applyRateLimitHeaders(

@@ -305,6 +305,11 @@ export function invalidateSession(token?: string | null) {
   db.prepare("DELETE FROM sessions WHERE token_hash = ?").run(hashSessionToken(token));
 }
 
+export function invalidateSessionsForUser(userId: string) {
+  const db = getDatabase();
+  db.prepare("DELETE FROM sessions WHERE user_id = ?").run(userId);
+}
+
 export function pruneExpiredSessions() {
   const db = getDatabase();
   db.prepare("DELETE FROM sessions WHERE expires_at <= ?").run(new Date().toISOString());

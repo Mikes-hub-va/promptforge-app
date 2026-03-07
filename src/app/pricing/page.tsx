@@ -5,7 +5,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { PLANS } from "@/data/constants";
 import { SectionHeading } from "@/components/marketing/section-heading";
 import { PricingCards } from "@/components/marketing/pricing-cards";
-import { isStripeConfigured } from "@/lib/billing/stripe";
+import { getPlatformStatus } from "@/lib/platform/status";
 
 export const metadata: Metadata = {
   title: "Pricing",
@@ -49,7 +49,8 @@ const pricingPrinciples = [
 ];
 
 export default function PricingPage() {
-  const billingReady = isStripeConfigured();
+  const platform = getPlatformStatus();
+  const billingReady = platform.billingReady;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 md:px-8">

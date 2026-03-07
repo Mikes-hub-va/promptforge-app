@@ -3,8 +3,11 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/auth/client";
 
 export function HomeHeroActions() {
+  const { user } = useAuth();
+
   return (
     <>
       <Button asChild>
@@ -13,7 +16,7 @@ export function HomeHeroActions() {
         </Link>
       </Button>
       <Button asChild variant="outline">
-        <Link href="/account">Open account</Link>
+        <Link href="/account">{user ? "Go to account" : "Open account"}</Link>
       </Button>
     </>
   );

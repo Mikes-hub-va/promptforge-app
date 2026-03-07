@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { findUserById, findUserByStripeCustomerId, updateUserBilling } from "@/lib/auth/server";
 import { getStripe, normalizeBillingStatus } from "@/lib/billing/stripe";
+import { getPlatformStatus } from "@/lib/platform/status";
 
 export const runtime = "nodejs";
 
@@ -37,6 +38,14 @@ async function syncSubscription(subscription: Stripe.Subscription) {
 export async function POST(request: Request) {
   const stripe = getStripe();
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET?.trim();
+  const platform = getPlatformStatus();
+
+  if (!platform.billing.runtimeAllowed) {
+    return NextResponse.json(
+      { error: platform.billing.runtimeGuardMessage ?? "Stripe webhook is disabled in this runtime." },
+      { status: 503 },
+    );
+  }
 
   if (!stripe || !webhookSecret) {
     return NextResponse.json({ error: "Stripe webhook is not configured." }, { status: 503 });
