@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { ArrowRight, Box, CircleCheckBig, Rocket, ShieldCheck, Sparkles, Workflow } from "lucide-react";
+import { Box, CircleCheckBig, Rocket, ShieldCheck, Sparkles, Workflow } from "lucide-react";
 import { HeroHeader, SectionHeading } from "@/components/marketing/section-heading";
 import { FeatureGrid } from "@/components/marketing/feature-grid";
+import { HomeHeroActions } from "@/components/marketing/home-hero-actions";
 import { PromptifyPreview } from "@/components/marketing/hero-preview";
 import { PricingCards } from "@/components/marketing/pricing-cards";
 import { Accordion } from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
 import { ProductMark } from "@/components/navigation/site-nav";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FAQ_ITEMS } from "@/data/constants";
@@ -83,18 +83,7 @@ export default function HomePage() {
             <HeroHeader
               title="Prompt systems for people shipping real work."
               description="Promptify turns rough ideas into structured prompt packs with synced accounts, managed runs, BYOK routing, and a workspace built for repeatable prompt operations."
-              cta={
-                <>
-                  <Button asChild>
-                    <Link href="/workspace" className="inline-flex items-center gap-2">
-                      Open the workspace <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                  <Button asChild variant="outline">
-                    <Link href="/account">Create account</Link>
-                  </Button>
-                </>
-              }
+              cta={<HomeHeroActions />}
               secondary={
                 <span className="inline-flex items-center gap-2">
                   <Sparkles className="h-4 w-4" /> {managedRuntimeLabel}
@@ -208,7 +197,7 @@ export default function HomePage() {
             </Link>
           </div>
           <p className="mt-4 text-sm text-slate-600">
-            These pages are designed for SEO and practical reuse, not just marketing copy.
+            Practical guides and templates you can use immediately, without reworking the structure from scratch.
           </p>
         </div>
       </section>
@@ -234,7 +223,7 @@ export default function HomePage() {
             <CardContent>
               <p className="text-sm text-slate-600">
                 {platform.managedRuntimeReady
-                  ? `${platform.managedProviders.join(", ")} are connected on this deployment, while local mode and BYOK remain available.`
+                  ? `Managed runs are available through ${platform.managedProviders.join(", ")}, while local mode and BYOK remain available.`
                   : "Local mode works today with no API key, and BYOK remains available even before managed cloud is enabled."}
               </p>
             </CardContent>

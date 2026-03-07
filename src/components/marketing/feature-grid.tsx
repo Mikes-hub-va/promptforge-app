@@ -1,4 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FEATURE_HIGHLIGHTS } from "@/data/constants";
 
 export function FeatureGrid() {
@@ -13,9 +13,6 @@ export function FeatureGrid() {
             <CardTitle>{feature.title}</CardTitle>
             <CardDescription>{feature.description}</CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="text-xs text-slate-500">Built into the forge pipeline by default.</p>
-          </CardContent>
         </Card>
       ))}
     </div>
